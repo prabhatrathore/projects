@@ -1,16 +1,10 @@
 const express = require('express');
 
-const collegeController = require('../controllers/collegeController')
-const internController = require('../controllers/internController')
+const urlController = require('../controllers/urlController')
 
 const router = express.Router();
 
-// College routes
-router.post('/colleges', collegeController.createCollege)
-router.get('/collegeDetails', collegeController.collegeDetails)
-
-// Intern routes
-router.post('/interns', internController.createIntern)
-
+router.post('/url/shorten', urlController.createUrl)
+router.get('/:code', urlController.getUrl)
 
 module.exports = router;
