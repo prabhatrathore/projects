@@ -14,13 +14,13 @@ const createUrl = async function (req, res) {
         let body = req.body;
         if (!isValidRequestBody(body)) {
             res.status(400).send({ status: false, msg: "provide  details" })
-            return   };
+            return };
 
-        const longUrl = req.body.longUrl;
+        const Url = req.body.longUrl;
         const urlCode = shortid.generate();
 
-        if (isValidUrl(longUrl)) {
-            let urlExist = await urlModel.findOne({ longUrl: longUrl })
+        if (isValidUrl(Url)) {
+            let urlExist = await urlModel.findOne({ longUrl: Url })
             if (urlExist) {
                 res.status(200).send({ status: true, data: urlExist })
             } else {

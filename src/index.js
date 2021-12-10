@@ -12,13 +12,13 @@ app.use(multer().any());
 
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb+srv://user-open-to-all:hiPassword123@cluster0.xgk0k.mongodb.net/GroupSSIP?retryWrites=true&w=majority", {useNewUrlParser: true})
+mongoose.connect("mongodb+srv://users-open-to-all:hiPassword123@cluster0.uh35t.mongodb.net/group10-ps4?retryWrites=true&w=majority", { useUnifiedTopology: true, useNewUrlParser: true })
     .then(() => console.log('mongodb running on 27017'))
     .catch(err => console.log(err))
 
 app.use('/', route);
 
-app.listen(process.env.PORT || 3000, function() {
-	console.log('Express app running on port ' + (process.env.PORT || 3000))
+app.listen(process.env.PORT || 3000, function () {
+    console.log('Express app running on port ' + (process.env.PORT || 3000))
 });
 
