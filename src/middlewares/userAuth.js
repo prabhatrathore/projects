@@ -16,7 +16,7 @@ const userAuth = async (req, res, next) => {
         req.userId = decoded.userId;
         next()
     } catch (error) {
-        console.error(`Error! ${error.message}`)
+       
         res.status(500).send({ status: false, message: error.message })
     }
 }

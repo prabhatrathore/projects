@@ -5,13 +5,13 @@ const isValid = function (value) {
     if (typeof value === 'undefined' || value === null) return false;
     if (typeof value === 'string' && value.trim().length === 0) return false;
     return true;
-}
+};
 const isValidTitle = function (title) {
     return ['Mr', 'Mrs', 'Miss', 'Mast'].indexOf(title) !== -1
-}
+};
 const isValidRequestBody = function (requestBody) {
     return Object.keys(requestBody).length > 0;
-}
+};
 const createUser = async function (req, res) {
     try {
         const requestBody = req.body;
@@ -19,10 +19,16 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide user details' })
             return
         } // Extract params
-        const { title, name, phone, email, password, address } = requestBody; // Object destructing
-        // Validation starts
+        let { title, name, phone, email, password, address } = requestBody;
+        // Object destructing
+        //  Validation starts
+        if (!isValid(title)) {
+            res.status(400).send({ status: false, message: `Title is required1` })
+            return
+        }
+        title = title.trim()
         if (!isValidTitle(title)) {
-            res.status(400).send({ status: false, message: `Title should be among Mr, Mrs, Miss and Mast` })
+            res.status(400).send({ status: false, message: `Title should be 'Mr', 'Mrs', 'Miss', 'Mast' ` })
             return
         }
         if (!isValid(name)) {
@@ -30,15 +36,14 @@ const createUser = async function (req, res) {
             return
         }
         if (!isValid(phone)) {
-            res.status(400).send({ status: false, message: 'phone is required' })
+            res.status(400).send({ status: false, message: 'phone no is required' })
             return
         };
-        if (!(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phone))) {
+        if (!(/^\(?([1-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phone))) {
             res.status(400).send({ status: false, message: `Please fill a valid phone number` })
             return
         };
         const isPhoneAlreadyUsed = await userModel.findOne({ phone }); //{phone: phone} object shorthand property
-
         if (isPhoneAlreadyUsed) {
             res.status(400).send({ status: false, message: `${phone} phone number is already registered` })
             return
@@ -55,7 +60,7 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, message: `Password is required` })
             return
         }
-        if (!(password.length > 8 && password.length < 15)) {
+        if (!(password.length > 8 && password.length <= 15)) {
             res.status(400).send({ status: false, message: "password should  between 8and 15 characters" })
             return
         };
@@ -64,8 +69,8 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, message: `${email} email address is already registered` })
             return
         };          // Validation ends
-        const userData = { title, name, phone, email, password, address }
-       
+        const userData = { title, name, phone, email, password, address };
+
         const newUser = await userModel.create(userData);
         res.status(201).send({ status: true, message: ` success`, data: newUser });
     } catch (error) {
@@ -80,22 +85,22 @@ const loginAuthor = async function (req, res) {
             return res.status(400).send({ status: false, msg: "provide login credentials" })
         };
         const { email, password } = data
-        if (!email) {
+        if (!isValid(email)) {
             return res.status(401).send({ status: false, msg: "Email is required" })
         };
-        if (!password) {
+        if (!isValid(password)) {
             res.status(402).send({ status: false, msg: "password is required" })
             return
         };
         const user = await userModel.findOne({ email, password })
         if (!user) {
-            res.status(403).send({ status: false, msg: "invalid login credentials" })
+            res.status(403).send({ status: false, msg: "invalid email or password, try again with valid login credentials " })
             return
         };
         const token = await jwt.sign({
             userId: user._id,
             iat: Math.floor(Date.now() / 1000),//issue date
-            exp: Math.floor(Date.now() / 1000) + 30 * 60//expire date 30*60 = 30min 
+            exp: Math.floor(Date.now() / 1000) + 300 * 60//expire date 30*60 = 30min 
         }, 'project4');
         res.header('x-api-key', token);
         res.status(200).send({ status: true, data: user._id, token });

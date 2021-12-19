@@ -1,38 +1,24 @@
 const mongoose = require('mongoose')
 
-
 const userSchema = new mongoose.Schema({
     title: {
-        type: String, enum: ['Mr', 'Mrs', 'Miss', 'Mast'],
-        required: 'Title is required',
+        type: String,required: 'title is necessary', enum: ['Mr', 'Mrs', 'Miss', 'Mast'],
+         trim: true
     },
-    name: { type: String, required: ' name is required', trim: true, },
+    name: { type: String, required: ' Name is required1', trim: true },
     phone: {
-        type: Number, required: 'phone number is required', unique: true, trim: true,
-        validate: {
-            validator: function (phone) {
-                return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phone);
-                // console.log(regex.test(phone))
-            }, message: 'Please fill a valid phone number'
-        }
+        type: Number, required: 'phone number is required1', unique: true, trim: true,
+       
     },
     password: {
-        type: String,
-        required: 'Password is required', minlength: 8, maxlength: 15, trim: true,
+        type: String, required: 'Password is required',
+        minlength: 8, maxlength: 15, trim: true,
     },
-    address: {
-        street: String, city: String, pincode: Number
-    },
+    address: { street: String, city: String, pincode: Number },
     email: {
         type: String, trim: true, lowercase: true, unique: true,
-        required: 'Email address is required',
-        validate: {
-            validator: function (email) {
-                return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
-            }, message: 'Please fill a valid email address', isAsync: false
-        }
+        required: 'Email address is necessary',
+      
     },
-
 }, { timestamps: true })
-
 module.exports = mongoose.model('user', userSchema,)

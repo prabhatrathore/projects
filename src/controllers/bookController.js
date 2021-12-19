@@ -32,30 +32,36 @@ const createBook = async function (req, res) {
             res.status(400).send({ status: false, message: ' excerpt is required' })
             return
         }
-        if (!isValid(ISBN)) {
-            res.status(400).send({ status: false, message: 'ISBN is required' })
-            return
-        }
+       
         if (!isValidObjectId(userId)) {
             res.status(400).send({ status: false, message: `${userId} is not a valid userId` })
             return
         };
+        if (!isValid(ISBN)) {
+            res.status(400).send({ status: false, message: 'ISBN is required' })
+            return
+        }
         if (!isValid(category)) {
             res.status(400).send({ status: false, message: 'category is required' })
             return
         }
+
         if (!isValid(subcategory)) {
             res.status(400).send({ status: false, message: 'subcategory is required' })
             return
         };
-        const user = await userModel.findById(userId);
+        if (!isValid(releasedAt)) {
+            res.status(400).send({ status: false, message: 'releasedAt is required' })
+            return
+        };
+        const user = await userModel.findOne({ _id: userId });
         if (!user) {
-            res.status(400).send({ status: false, message: `user does not exit` })
+            res.status(400).send({ status: false, message: `user is not exit in database` })
             return
         }; // Validation ends
-        const bookData = {
-            title, excerpt, userId, category, subcategory, ISBN, releasedAt// releasedAt ? new Date.now(),
-        };
+        const bookData = { title, excerpt, userId, category, subcategory, ISBN,
+            releasedAt
+        };     
         let id = req.body.userId;
         let decodeId = req.userId;
         if (decodeId == id) {
@@ -69,44 +75,54 @@ const createBook = async function (req, res) {
             res.status(403).send({ status: false, msg: 'authorisation failed1' })
         }
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).send({ status: false, message: error.message });
     }
 }
 const getBooks = async function (req, res) {
     try {
-        //  const filterQuery = {isDeleted: false}
+        const filterQuery = { isDeleted: false }
         let querybody = req.query;
-        if (!isValidRequestBody(querybody)) {
-            res.status(400).send({ status: false, message: 'no query parametres given,Invalid request parameters. Please provide book details' })
-            return
+
+        if(isValidRequestBody(querybody)) {
+            const {userId, category, subcategory} = querybody
+
+            if(isValid(userId) && isValidObjectId(userId)) {
+                filterQuery['userId'] = userId            
         };
-        let data = await bookModel.find(querybody).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 }).sort({ title: +1 })
-        if (data.length == 0) {
-            res.status(404).send({ status: false, msg: "no data found" })
-        } else {
-            res.status(200).send({ status: true, data: data })
-        };
+            if(isValid(category)) {
+                filterQuery['category'] = category.trim()
+            };                  
+            if(isValid(subcategory)) {
+               
+                filterQuery['subcategory'] = subcategory // {$all: subcatArr}   
+               }    
+            }      
+        let data = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1,subcategory:1 }).sort({ title: +1 })
+        //console.log(data)
+       if (data) {
+           return res.status(200).send({ status: true,msg:"books list",data: data })
+       }  else {
+                res.status(400).send({ status: false, msg: "no book found " })
+          }  
     }
     catch (err) {
         res.status(500).send({ status: false, msg: err.message })
     }
 }
-
 const bookById = async function (req, res) {
     try {
         let book = req.params.bookId;
         let data = await bookModel.findOne({ _id: book, isDeleted: false });
-      //  console.log(data)
+        //  console.log(data)
         if (!data) {
             res.status(400).send({ status: false, msg: "no book found or may be deleted" })
             return
         };
         const reviewData = await reviewModel.find({ bookId: book, isDeleted: false })
-//console.log(reviewData)
-
+        //console.log(reviewData)
         const dataOf = { data, reviewData }
-        res.status(200).send({ status: true, data: dataOf })
+        res.status(200).send({ status: true, msg:"books list ",data: dataOf })
         return
     }
     catch (err) {
@@ -119,7 +135,7 @@ const updateBook = async function (req, res) {
         let bookId = req.params.bookId;
         let bookData = await bookModel.findOne({ _id: bookId, isDeleted: false });
         if (!bookData) {
-            return res.status(404).send({ status: false, msg: 'invalid book id or book is deleted' })
+            return res.status(404).send({ status: false, msg: 'invalid book id or may be this book is deleted' })
         };
         let userId = bookData.userId;
         if (decodeId == userId) {
@@ -133,6 +149,8 @@ const updateBook = async function (req, res) {
                 },
             }, { new: true })
             res.status(200).send({ status: true, data: updatedValue });
+        }else {
+            res.status(400).send({status:false, msg:'authorisation failed, not valid user'})
         }
     } catch (error) {
         res.status(500).send({ status: false, message: error.message });
@@ -153,7 +171,7 @@ const deleteById = async function (req, res) {
             let data = await bookModel.findOne({ _id: bookId, isDeleted: false })
             if (data) {
                 let deleteData = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
-                res.status(200).send({ status: true, deletedAt: Date.now() })
+                res.status(200).send({ status: true, deletedAt: Date() })
             } else {
                 res.status(400).send({ status: false, msg: "invalid input of id or the document is already delete" })
             }
