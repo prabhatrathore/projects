@@ -72,8 +72,8 @@ const createIntern = async function (req, res) {
     }
 }
 
-const getAllInterns = async function (req, res) {//original
-    try { // handling if there are any space that are given in query param        
+const getAllInterns = async function (req, res) {
+    try {         
         let queryname = req.query.collegeName
         if (!queryname) {
             res.status(400).send({ status: false, err: "College Name is required" })
@@ -85,7 +85,7 @@ const getAllInterns = async function (req, res) {//original
             res.status(400).send({ status: false, err: "college abbreviation contains space , try writing without any space" })
             return
         } let tempcolgName = queryname
-        // in case the query name is not in lowecase then instead of converting in lower case 
+    
         if (queryname != queryname.toUpperCase()) {
             res.status(400).send({ status: false, err: "college abbreviation should be in upperCase. Write in capital letters and try again" })
             return
@@ -97,7 +97,7 @@ const getAllInterns = async function (req, res) {//original
         }
         let ID = temp._id
         let data = temp
-        // INTERN NAMES CAN HAVE MUTIPLE SPACES COZ THERE CAN BE A NAME CALLED RAHUL KUMAR SHAW SO WE PURPOSELY DID NOT REMOVED THE SPACE.
+        
         let interns = await internModel.find({ collegeId: ID }).select({ _id: 1, name: 1, email: 1, mobile: 1 })
         if (interns.length == 0) {
             let details = { name: data.name, fullname: data.fullName, logolink: data.logo, interests: interns }
