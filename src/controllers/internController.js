@@ -72,27 +72,24 @@ const createIntern = async function (req, res) {
     };
 };
 
+
 const getAllInterns = async function (req, res) {
-    try {         
+    try {     
         let queryname = req.query.collegeName
         if (!queryname) {
             res.status(400).send({ status: false, err: "College Name is required" })
             return
         };
-
         let propername = queryname.replace(/\s+/g, '')
         if (propername != queryname) {
             res.status(400).send({ status: false, err: "college abbreviation contains space , try writing without any space" })
             return
         };
-        let tempcolgName = queryname
-    
+       
         if (queryname != queryname.toUpperCase()) {
             res.status(400).send({ status: false, err: "college abbreviation should be in upperCase. Write in capital letters and try again" })
             return
-        };
-        
-        let colgName = queryname
+        }; 
         let temp = await collegeModel.findOne({ name: queryname })
         if (!temp) {
             res.status(400).send({ status: false, err: "Invalid parameters: Provide a valid college abbreviation" })
@@ -106,13 +103,13 @@ const getAllInterns = async function (req, res) {
             let details = { name: data.name, fullname: data.fullName, logolink: data.logo, interests: interns }
             res.status(200).send({ status: true, data: details, msg: "No Interns applied for an internship" })
             return
-        };
+        }
         let details = { name: data.name, fullname: data.fullName, logolink: data.logo, interests: interns }
         res.status(200).send({ status: true, Details: details })
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message });
-    };
-};
+    }
+}
 module.exports.createIntern = createIntern;
 module.exports.getAllInterns = getAllInterns;
