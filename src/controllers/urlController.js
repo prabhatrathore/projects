@@ -71,8 +71,7 @@ let regex =/(:?^((https|http|HTTP|HTTPS){1}:\/\/)(([w]{3})[\.]{1})?([a-zA-Z0-9]{
         return res.status(500).send({ status: false, msg: err.message });
     }
 }
-//******************
-// *************************
+
 const getUrl = async function (req, res) {
     let cahcedProfileData = await GET_ASYNC(`${req.params.code}`)
     let data  = JSON.parse(cahcedProfileData)
